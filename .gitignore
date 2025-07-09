@@ -1,41 +1,92 @@
-# Prerequisites
-*.d
+#include <16F877A.h>
+#use delay(clock=4000000)
+#use standard_io(A)
+#use standard_io(B)
+#use standard_io(C)
+#include <lcd_test.c>  // LCD bağlantılarını buradan tanımladığını varsayıyorum
 
-# Compiled Object files
-*.slo
-*.lo
-*.o
-*.obj
+// Sensör Trig Pinleri
+#define TRIG_FRONT  PIN_B0
+#define TRIG_REAR   PIN_B1
+#define TRIG_LEFT   PIN_B2
+#define TRIG_RIGHT  PIN_B3
 
-# Precompiled Headers
-*.gch
-*.pch
+// Sensör Echo Pinleri
+#define ECHO_FRONT  PIN_C0
+#define ECHO_REAR   PIN_C1
+#define ECHO_LEFT   PIN_C2
+#define ECHO_RIGHT  PIN_C3
 
-# Linker files
-*.ilk
+// Buzzer
+#define BUZZER      PIN_A0
 
-# Debugger Files
-*.pdb
+int16 map(int16 x, int16 in_min, int16 in_max, int16 out_min, int16 out_max) {
+   return ((x - in_min) * (out_max - out_min)) / (in_max - in_min) + out_min;
+}
 
-# Compiled Dynamic libraries
-*.so
-*.dylib
-*.dll
+// Mesafe ölçümü (cm)
+int16 measure_distance(int trig, int echo) {
+    output_low(trig);
+    delay_us(2);
+    output_high(trig);
+    delay_us(10);
+    output_low(trig);
 
-# Fortran module files
-*.mod
-*.smod
+    int16 timeout = 0;
+    while(!input(echo) && timeout++ < 30000);
+    if(timeout >= 30000) return 999;
 
-# Compiled Static libraries
-*.lai
-*.la
-*.a
-*.lib
+    set_timer1(0);
+    setup_timer_1(T1_INTERNAL | T1_DIV_BY_2);
+    while(input(echo));
+    int16 time = get_timer1();
 
-# Executables
-*.exe
-*.out
-*.app
+    return 2*time / 58;  // cm
+}
 
-# debug information files
-*.dwo
+// Buzzer kontrolü (mesafeye göre bip frekansı)
+void control_buzzer(int16 min_distance) {
+    if(min_distance < 30) {
+        // Yaklaştıkça bipler sıklaşır
+        int16 interval = map(min_distance, 0, 50, 50, 500); // 0 cm › 50 ms, 50 cm › 500 ms
+        if(interval < 50) interval = 50;
+
+        output_high(BUZZER);
+        delay_ms(50);              // Buzzer açık süresi sabit
+        output_low(BUZZER);
+        delay_ms(interval);       // Buzzer kapalı süresi değişken
+    } else {
+        output_low(BUZZER);       // Uzaksa sus
+    }
+}
+
+void main() {
+    int8 front, rear, left, right;
+    int min_dist;
+
+    set_tris_a(0x00);  // A çıkış
+    lcd_init();
+    setup_timer_1(T1_DISABLED);
+
+    while(TRUE) {
+        front = measure_distance(TRIG_FRONT, ECHO_FRONT);
+        rear  = measure_distance(TRIG_REAR, ECHO_REAR);
+        left  = measure_distance(TRIG_LEFT, ECHO_LEFT);
+        right = measure_distance(TRIG_RIGHT, ECHO_RIGHT);
+
+        // Minimumu hesapla
+        min_dist = front;
+        if(rear  < min_dist) min_dist = rear;
+        if(left  < min_dist) min_dist = left;
+        if(right < min_dist) min_dist = right;
+
+        // LCD yazımı
+        lcd_gotoxy(1,1);
+        printf(lcd_putc, "F:%dcm B:%dcm", front, rear);
+        lcd_gotoxy(2,1);
+        printf(lcd_putc, "L:%dcm R:%dcm", left, right);
+
+        // Buzzer kontrol
+        control_buzzer(min_dist);
+    }
+}
