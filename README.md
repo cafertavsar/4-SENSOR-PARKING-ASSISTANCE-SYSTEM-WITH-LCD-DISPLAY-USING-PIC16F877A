@@ -1,115 +1,70 @@
-4-SENSOR PARKING ASSISTANCE SYSTEM WITH LCD DISPLAY USING PIC16F877A
-
-
-PROJECT DESCRIPTION
-
-
-This project is a microcontroller-based parking assistance system developed using the PIC16F877A and four ultrasonic distance sensors. The system measures the distance to nearby obstacles in four directions: front, rear, left, and right. The measured distances are displayed in real-time on a 16x2 character LCD screen. Additionally, a passive buzzer provides audible feedback based on the proximity of the nearest obstacle. This system is designed to assist drivers or autonomous systems in avoiding collisions during parking or navigation in tight spaces.
-
-
-KEY FEATURES
-
-
--Distance detection in four directions (front, rear, left, right)
-
--Real-time display of distance values on LCD
-
--Proximity-based audible feedback using a buzzer
-
--Uses CCS C and PIC16F877A microcontroller
-
--Simple, modular, and easily expandable code structure
-
--Can be used for educational, automotive, or robotic applications
-
-
-HARDWARE COMPONENTS
-
-
--PIC16F877A microcontroller
-
--4 ultrasonic sensors (e.g., HC-SR04 or analog-compatible)
-
--16x2 LCD display
-
--Passive buzzer
-
--Resistors and jumper wires
-
--Power supply (5V regulated)
-
--Breadboard or printed circuit board (PCB)
-
-
-SOFTWARE TOOLS
-
-
--MPLAB X IDE
-
--CCS C Compiler
-
--Proteus Design Suite (optional, for simulation)
-
-
-CODE OVERVIEW
-
-
-The code defines the trigger and echo pins for each ultrasonic sensor. The function measure_distance(trig, echo) sends a 10-microsecond trigger pulse and uses Timer1 to measure the echo pulse width. This width is converted to distance in centimeters using the formula:
-
--distance = 2 * time / 58
-
--Each sensor is read one by one to prevent ultrasonic interference. The distances are displayed on the LCD in two lines:
-
--Line 1: front and rear distances
-
--Line 2: left and right distances
-
--The minimum of the four distances is calculated. Based on this value, the buzzer is controlled:
-
--If the object is closer than 30 cm, the buzzer beeps
-
--The beep interval is shorter when the obstacle is closer
-
--If the object is farther than 30 cm, the buzzer remains off
-
--The beep interval is dynamically calculated using a simple map() function.
-
-
-PROGRAM FLOW
-
-
--Initialize all sensors and LCD
-
--Measure distance from each sensor
-
--Display all four distances on the LCD
-
--Find the shortest distance
-
--Activate the buzzer based on the shortest distance
-
--Repeat continuously
-
-
-DISTANCE RESPONSE LOGIC
-
-
--Distance > 30 cm → No buzzer sound
-
--30 cm ≥ Distance > 10 cm → Intermittent beep (interval based on distance)
-
--Distance ≤ 10 cm → Fast and continuous beeping
-
-
-POSSIBLE IMPROVEMENTS
-
-
--Replace the buzzer delay logic with PWM for better tone control
-
--Add LED bar indicators or RGB lights for visual distance feedback
-
--Integrate direction-based audio messages or alerts
-
--Add Bluetooth module for mobile app integration
-
--Include EEPROM logging or data export over serial port
+# 4-Sensor Parking Assistance System with LCD Display Using PIC16F877A
+
+## Project Description
+This project is a microcontroller-based parking assistance system designed with the PIC16F877A and four ultrasonic distance sensors. The system measures distances to obstacles in four directions: front, rear, left, and right. These distances are displayed in real-time on a 16x2 character LCD screen. A passive buzzer provides audible feedback based on the proximity of the closest obstacle. This system is useful for assisting drivers or autonomous systems in avoiding collisions during parking or in tight spaces.
+
+## Key Features
+- **Four-Direction Distance Detection**: Measures distances in front, rear, left, and right.
+- **Real-Time LCD Display**: Displays distance values on a 16x2 LCD screen.
+- **Proximity-Based Audible Alerts**: Buzzer feedback varies with the nearest obstacle's distance.
+- **Microcontroller-Based**: Built around the PIC16F877A and written in CCS C.
+- **Modular and Expandable**: Code designed to be simple, modular, and easily extendable.
+- **Versatile Applications**: Suitable for educational, automotive, or robotic use cases.
+
+## Hardware Components
+- PIC16F877A Microcontroller
+- 4 Ultrasonic Sensors (e.g., HC-SR04 or analog-compatible)
+- 16x2 LCD Display
+- Passive Buzzer
+- Resistors and Jumper Wires
+- Power Supply (5V Regulated)
+- Breadboard or Printed Circuit Board (PCB)
+
+## Software Tools
+- **MPLAB X IDE**
+- **CCS C Compiler**
+- **Proteus Design Suite** (optional, for simulation purposes)
+
+## Code Overview
+- **Ultrasonic Sensor Logic**:
+  - Each sensor has defined trigger and echo pins.
+  - The function `measure_distance(trig, echo)` sends a 10-microsecond trigger pulse and calculates the echo pulse width using Timer1.
+  - Distance is computed in centimeters using the formula:
+    ```plaintext
+    distance = 2 * time / 58
+    ```
+- **Reading Sensors**:
+  - Sensors are read sequentially to prevent ultrasonic interference.
+  - The LCD displays:
+    - **Line 1**: Front and rear distances.
+    - **Line 2**: Left and right distances.
+- **Proximity Alerts**:
+  - The minimum distance among the four sensors is calculated.
+  - The buzzer behavior is based on the closest obstacle:
+    - If distance > 30 cm: No sound.
+    - If 30 cm ≥ distance > 10 cm: Intermittent beeping (shorter intervals for closer objects).
+    - If distance ≤ 10 cm: Continuous fast beeping.
+  - A simple `map()` function dynamically calculates the beeping interval.
+
+## Program Flow
+1. Initialize sensors and LCD.
+2. Measure distance from each sensor.
+3. Display all four distances on the LCD.
+4. Calculate the shortest distance.
+5. Control the buzzer based on the shortest distance.
+6. Repeat the above steps continuously.
+
+## Distance Response Logic
+- **Distance > 30 cm**: No buzzer sound.
+- **30 cm ≥ Distance > 10 cm**: Intermittent beeping (interval decreases with proximity).
+- **Distance ≤ 10 cm**: Fast and continuous beeping.
+
+## Possible Improvements
+- Replace buzzer delay logic with PWM for better tone control.
+- Add LED bar indicators or RGB lights for visual feedback.
+- Integrate direction-based audio messages or alerts.
+- Add a Bluetooth module for mobile app integration.
+- Include EEPROM logging or data export via a serial port.
+
+---
+This project serves as a practical and adaptable solution for parking assistance. Its modular design and the potential for enhancements make it a great platform for further development in automotive and robotic applications.
